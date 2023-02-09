@@ -31,7 +31,7 @@ EOF
 
 curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | sudo tar -C /usr/local/bin -xvzf - govc
 CLUSTER_DOMAIN="dynamic.opentlc.com "
-RHCOS_TEMPLATE="Templates/rhcos-4.11.9"
+RHCOS_TEMPLATE="Workloads/sandbox-{{ guid }}/coreos"
 
 VM_NETWORK="segment-sandbox-{{ guid }}"
 VM_DATASTORE="WorkloadDatastore"

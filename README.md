@@ -3,7 +3,7 @@ This repository is intended to prepare a [VMware Cloud Open Environment Service]
 
 ## Understanding the Lab Environment
 The VMware Cloud Open Environment service gives us a few things:
-1. A bastion host running RHEL9, with SSH access via username/password.
+1. A bastion host running RHEL8, with SSH access via username/password.
 2. VCenter portal access, with a sandbox user account. This user has limited access to a folder named **Workloads/sandbox-${guid}**
 3. Wildcard DNS pointing to your bastion with the record: `*.${guid}.dynamic.opentlc.com`
 
@@ -54,3 +54,20 @@ ansible-playbook -i ansible/inventory ansible/main.yml
 ```
 
 ## Installing OpenShift
+Now we're ready to install OpenShift!
+
+### Create a VM Template in VCenter
+1. To start your installation, you'd first normally head over to [The Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/install/vsphere/user-provisioned) and click **Download RHCOS OVA** to grab the latest RHEL CoreOS version. For this lab, we're going to use 4.11.9, which you can download directly by clicking [this link](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.11/4.11.9/rhcos-vmware.x86_64.ova).
+
+2. Then go to VCenter, right click on your **Workloads/sandbox-${guid}** folder, and select **Deploy OVF Template...**
+3. Select **Local File** and provide the OVA you just downloaded
+4. Accept the defaults for sections 2-4 of the wizard (name = **coreos**), and then select **WorkloadDatastore** for storage in section 5
+5. In section 7, be sure to specify **base64** for the Ignition config data encoding:
+   ![ignition encoding](images/ignition-encoding.png "Ignition Encoding")
+6. Click Next and Finish to complete the template creation. It will take a few minutes to upload and deploy.
+
+### Create the temporary bootstrap node
+
+### Create the control plane nodes
+
+### Create the compute nodes
