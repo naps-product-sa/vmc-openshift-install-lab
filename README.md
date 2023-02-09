@@ -62,7 +62,11 @@ Now we're ready to install OpenShift!
 2. Then go to VCenter, right click on your **Workloads/sandbox-${guid}** folder, and select **Deploy OVF Template...**
 3. Select **Local File** and provide the OVA you just downloaded
 4. Accept the defaults for sections 2-4 of the wizard (name = **coreos**), and then select **WorkloadDatastore** for storage in section 5
-5. Accept the rest of the defaults and click Finish to complete the template creation. It will take a few minutes to upload and deploy.
+5. Click Next and Finish to complete the template creation. It will take a few minutes to upload and deploy.
+6. Once the template has finished uploading, right click on it (**coreos**), and select **Edit Settings...**
+7. Switch to **Advanced Parameters** and add the following:
+   * Attribute: `guestinfo.ignition.config.data.encoding`
+   * Value: `base64`
 
 ### Create the temporary bootstrap node
 
