@@ -64,6 +64,20 @@ ocp4_pull_secret: 'CHANGEME'
 1. Replace the existing values for the guid and vcenter password you got from RHDP
 2. Grab your OpenShift Pull Secret from the [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/install/vsphere/agent-based) and paste it *between the single ticks* for the `ocp4_pull_secret` variable.
 
+### Wait, what am I about to run?
+The playbook we're about to run has two plays: `Configure bastion for OCP4 UPI` and `Create OpenShift Installation Directory and Prereqs`. Let's take a closer look at each of them for a moment.
+
+#### Configure bastion for OCP4 UPI
+Recall that our bastion will be serving a handful of important functions to allow us to proceed with our install in a constrained environment.
+**A proxy to route API and Ingress traffic**
+
+**A local DNS server to provide hostname resolution within the OpenShift cluster**
+
+**A file server to host ignition configs**
+
+#### Create OpenShift Installation Directory and Prereqs
+
+
 ### Run the configuration playbook
 Now we should be ready to run our playbook!
 ```bash
@@ -142,7 +156,7 @@ Next we'll create the bootstrap node, which will help facilitate the install and
 8. Adjust the following settings in **Virtual Hardware**:
    * CPU: 4
    * Memory: 16 GB
-9. Switch to **Advanced Paramters** and add the following attribute/value pairs. The values are derived from running the indicated commands on your bastion.
+9. Switch to **Advanced Parameters** and add the following attribute/value pairs. The values are derived from running the indicated commands on your bastion.
    * `guestinfo.ignition.config.data`: 
         ```bash
         cat ~/ocpinstall/install/merge-bootstrap.ign | base64 -w0
