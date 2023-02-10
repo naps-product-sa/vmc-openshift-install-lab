@@ -4,7 +4,7 @@ compute:
 - architecture: amd64
   hyperthreading: Enabled
   name: worker
-  replicas: 2
+  replicas: 0
 controlPlane:
   architecture: amd64
   hyperthreading: Enabled
@@ -18,7 +18,7 @@ platform:
     defaultDatastore: WorkloadDatastore
     diskType: thin
     folder: /SDDC-Datacenter/vm/Workloads/sandbox-{{ guid }}
-    password: {{ vcenter_password }}
+    password: {{ vcenter_password}}
     username: sandbox-{{ guid }}@{{ vcenter_domain }}
     vCenter: {{ vcenter_hostname }}
 publish: External
