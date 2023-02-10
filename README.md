@@ -70,7 +70,7 @@ The playbook we're about to run has two plays: `Configure bastion for OCP4 UPI` 
 #### Configure bastion for OCP4 UPI
 Recall that our bastion will be serving a handful of important functions to allow us to proceed with our install in a constrained environment.
 
-*A load balancer to route API and Ingress traffic*
+**A load balancer to route API and Ingress traffic**
 We don't have the permission to grant inbound Internet access to hosts we create, we'll route all of our traffic through the bastion host. In order to achieve this, we'll use HAProxy. Check out line 61 in our config file at `ansible/templates/haproxy.j2`:
 ```bash
 frontend api
@@ -88,7 +88,7 @@ frontend insecurerouter
 ```
 You can see we're listening on port 6443 for the Kubernetes API, 22623 for serving ignition configs, and 80 and 443 for application ingress. We then route corresponding traffic to the appropriate backends, defined further down in the HAProxy and described in the OpenShift documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-load-balancing-user-infra_installing-vmc-user-infra).
 
-*A local DNS server to provide hostname resolution within the OpenShift cluster*
+**A local DNS server to provide hostname resolution within the OpenShift cluster**
 We don't have the capacity to create public DNS records, a step that is normally required for `api.<cluster_name>.<base_domain>` and `*.apps.<cluster_name>.<base_domain>` as indicated in the documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-dns-user-infra_installing-vmc-user-infra). For our lab, we'll use a self-hosted DNS server called BIND. The most important piece of our configuration is defined in `ansible/templates/dynamic.opentlc.com.zone.j2`:
 ```
 $TTL 1D
@@ -116,7 +116,7 @@ provision.{{ guid }}    IN    A    192.168.{{ labenv_segment }}.10
 ```
 For all the records we're going to need, we define them as `<role>.<guid>.dynamic.opentlc.com`, and assign each one an IP address after `{{ labenv_segment }}` is expanded to the third octet in ansible. If you want to learn more about using BIND, you can take a look at [this blog](https://www.redhat.com/sysadmin/dns-configuration-introduction).
 
-*A file server to host ignition configs*
+**A file server to host ignition configs**
 We'll also need to host ignition configs so that our RHCOS machines can fetch their configuration. We'll generate these during the lab exercises and copy them over to an Apache server, which is simple enough to install, configure, and enable with ansible, as we see in `ansible/main.yml`:
 ```
   - name: Install required software
