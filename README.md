@@ -1,5 +1,5 @@
 # VMC OpenShift Install Lab
-This repository is intended to prepare a [VMware Cloud Open Environment Service](https://demo.redhat.com/catalog?search=vmware&category=Open_Environments&item=babylon-catalog-prod%2Fvmc.sandbox.prod) in the [Red Hat Demo Platform (RHDP)](https://demo.redhat.com) for a UPI installation of OpenShift.
+This repository is intended to leverage the [VMware Cloud Open Environment Service](https://demo.redhat.com/catalog?search=vmware&category=Open_Environments&item=babylon-catalog-prod%2Fvmc.sandbox.prod) in the [Red Hat Demo Platform (RHDP)](https://demo.redhat.com) for a UPI installation of OpenShift.
 
 ## Understanding the Lab Environment
 Before we begin the hands-on portion of the lab, let's take a moment to understand the environment we'll be using today.
@@ -76,9 +76,9 @@ Now we're ready to install OpenShift!
 ### Create a VM Template in VCenter
 1. To start your installation, you'd normally head over to [The Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/install/vsphere/user-provisioned) and click **Download RHCOS OVA** to grab the latest RHEL CoreOS OVA template. For this lab, we're going to use 4.11.9, which you can download directly by clicking [this link](https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.11/4.11.9/rhcos-vmware.x86_64.ova).
 
-2. Then go to VCenter, right click on your **Workloads/sandbox-${guid}** folder, and select **Deploy OVF Template...**
+2. Then go to vCenter, right click on your **Workloads/sandbox-${guid}** folder, and select **Deploy OVF Template...**
 3. Select **Local File** and provide the OVA you just downloaded.
-   > We can't use the URL directly here because VCenter throws a Peer not authenticated error when requesting the OVA from the OpenShift mirror site.
+   > We can't use the URL directly here because vCenter throws a Peer not authenticated error when requesting the OVA from the OpenShift mirror site.
 4. Accept the defaults for sections 2-4 of the wizard, and then select **WorkloadDatastore** for storage in section 5
 5. Click Next and Finish to complete the template creation. It will take a few minutes to upload and deploy.
 6. Once the template has finished uploading, right click on it (**coreos**), and select **Edit Settings...**
@@ -204,6 +204,9 @@ Next we'll build 2 compute nodes. Aside from requiring unique hostnames and IP a
 #### worker0
 Repeat the procedure for the bootstrap node, with the following differences:
 * Virtual machine name: `worker0.GUID.dynamic.opentlc.com`
+* In Step 8, adjust the following settings in **Virtual Hardware**:
+   * CPU: 2
+   * Memory: 8 GB
 * In Step 9:
    * `guestinfo.ignition.config.data`: 
         ```bash
@@ -218,6 +221,9 @@ Repeat the procedure for the bootstrap node, with the following differences:
 #### worker1
 Repeat the procedure for the bootstrap node, with the following differences:
 * Virtual machine name: `worker1.GUID.dynamic.opentlc.com`
+* In Step 8, adjust the following settings in **Virtual Hardware**:
+   * CPU: 2
+   * Memory: 8 GB
 * In Step 9:
    * `guestinfo.ignition.config.data`: 
         ```bash
@@ -228,3 +234,48 @@ Repeat the procedure for the bootstrap node, with the following differences:
         export SEGMENT=$(hostname -I|cut -d. -f3)
         echo "ip=192.168.${SEGMENT}.201::192.168.${SEGMENT}.1:255.255.255.0:::none nameserver=192.168.${SEGMENT}.10"
         ```
+
+### Starting the bootstrap
+Now that you've finished creating your nodes, go ahead and power them all on to begin the [bootstrap process](https://docs.openshift.com/container-platform/4.11/architecture/architecture-installation.html#installation-process_architecture-installation). If you've done everything correctly, the **web console** for each host should eventually reach a login prompt. It's normal for the nodes to restart themselves a couple times during this process. If you see anything related to an `Emergency target` in the console output, it's likely that something isn't right. Power the node off and go back and check that your properties are correct.
+
+If everything looks good, ssh into your bastion and run:
+```bash
+openshift-install wait-for bootstrap-complete --dir ~/ocpinstall/install --log-level=debug
+```
+
+This will allow you to follow the progress of the bootstrap process. After a few minutes, you should see something like:
+```bash
+INFO Waiting up to 20m0s (until 10:30AM) for the Kubernetes API at https://api.dd4sw.dynamic.opentlc.com:6443... 
+INFO API v1.24.0+dc5a2fd up 
+```
+This means your Kubernetes API is up! You should be able to send requests to it to inspect resources as they are created. The installer creates a kubeconfig for you, which you can use like this:
+```bash
+export KUBECONFIG=~/ocpinstall/install/auth/kubeconfig
+
+oc whoami
+oc get nodes
+```
+
+If you terminated your `wait-for bootstrap-complete` command, go ahead and run it again:
+```bash
+openshift-install wait-for bootstrap-complete --dir ~/ocpinstall/install --log-level=debug
+```
+After some time, you should see something like:
+```bash
+INFO Waiting up to 30m0s (until 10:40AM) for bootstrapping to complete... 
+DEBUG Bootstrap status: complete                   
+INFO It is now safe to remove the bootstrap resources 
+```
+You read that right! It's now safe to obliterate your **bootstrap** machine. The installation is not finished though, the cluster still has work to do. As nodes join into the cluster, the issue certificate-signing requests (CSRs) that must be approved before the installation can complete. About 5 minutes after the bootstrap is finished, there should be a couple of requests pending, which you can approve like this:
+```bash
+for i in `oc get csr --no-headers | grep -i pending |  awk '{ print $1 }'`; do oc adm certificate approve $i; done
+```
+
+About 3 minutes later, there will be another request or two, so we'll run that command again:
+```bash
+for i in `oc get csr --no-headers | grep -i pending |  awk '{ print $1 }'`; do oc adm certificate approve $i; done
+```
+Once that's done, our install is nearly complete! We can watch its progress by running:
+```bash
+openshift-install wait-for install-complete --dir ~/ocpinstall/install --log-level=debug
+```
