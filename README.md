@@ -83,6 +83,7 @@ sudo cp ~/ocpinstall/install/*.ign /var/www/html/
 sudo chown apache:apache /var/www/html/*
 
 # Create ignition config for the bootstrap node
+export SEGMENT=$(hostname -I|cut -d. -f3)
 cat >merge-bootstrap.ign <<EOF
 {
   "ignition": {
