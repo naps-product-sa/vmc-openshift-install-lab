@@ -69,14 +69,14 @@ The playbook we're about to run has two plays: `Configure bastion for OCP4 UPI` 
 
 #### Configure bastion for OCP4 UPI
 Recall that our bastion will be serving a handful of important functions to allow us to proceed with our install in a constrained environment.
-**A proxy to route API and Ingress traffic**
+*A proxy to route API and Ingress traffic*
 
-**A local DNS server to provide hostname resolution within the OpenShift cluster**
+*A local DNS server to provide hostname resolution within the OpenShift cluster*
 
-**A file server to host ignition configs**
+*A file server to host ignition configs*
 
 #### Create OpenShift Installation Directory and Prereqs
-
+TODO: Remove this playbook and make it manual
 
 ### Run the configuration playbook
 Now we should be ready to run our playbook!
