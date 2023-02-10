@@ -5,7 +5,7 @@ This repository is intended to leverage the [VMware Cloud Open Environment Servi
 Before we begin the hands-on portion of the lab, let's take a moment to understand the environment we'll be using today.
 
 ### VMC vs vSphere
-[VMware Cloud on AWS (VMC)](https://vmc.techzone.vmware.com/vmc-arch/docs/introduction/vmc-aws-a-technical-overview) is a managed cloud offering that provides dedicated VMware vSphere-based Software Defined Data Centers (SDDC) that are hosted within AWS facilities. The solution was designed to create an easy migration path from the datacenter to the cloud since vSphere admins wouldn't have to learn to use a new virtualization provider. Both vSphere and VMC SDDCs can be managed with vCenter and the [govc CLI](https://github.com/vmware/govmomi/tree/main/govc), creating a similar experience between the two platforms.
+[VMware Cloud on AWS (VMC)](https://vmc.techzone.vmware.com/vmc-arch/docs/introduction/vmc-aws-a-technical-overview) is a managed cloud offering that provides dedicated VMware vSphere-based Software Defined Data Centers (SDDC) that are hosted within AWS facilities. The solution was designed to create an easy migration path from the datacenter to the cloud and prevent vSphere admins from having to learn to use a new virtualization provider. Both vSphere and VMC SDDCs can be managed with vCenter and the [govc CLI](https://github.com/vmware/govmomi/tree/main/govc), creating a similar experience between the two platforms.
 
 This works to our advantage for this lab, since cloud-based environments offer better scalability than on-prem ones. Even though we'll be working in a VMC environment today, you should be able to commute most of what you learn to vSphere on-prem engagements. We'll be sure to point out any nuances we encounter that are specific to VMC along the way.
 
@@ -15,7 +15,7 @@ The VMware Cloud Open Environment service gives us a few things:
 2. VCenter portal access, with a sandbox user account. This user has limited access to a folder named **Workloads/sandbox-${guid}**
 3. Wildcard DNS pointing to your bastion with the record: `*.${guid}.dynamic.opentlc.com`
 
-This lab is designed to work within those constraints to offer participants the opportunity to build experience installing OpenShift 4 in a VMware environment. Because our sandbox user has limited permissions, we're not going to be able to use [installer-provisioned infrastructure (IPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/preparing-to-install-on-vmc.html#installer-provisioned-method-to-install-ocp-on-vmc). If we were, we could leverage [these awesome scripts](https://gist.github.com/johnsimcall/69e7e7de04130c59c9bd51adbf9d9a2a) to grant the necessary privileges and then let the OpenShift installer handle pretty much everything else. Instead, we're going to leverage [user-provisioned infrastructure (UPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html). On the bright side, this lab will give you a better understanding of the nuts and bolts of the install, and prepare you for customer environments where granting the permissions required for IPI are not achievable.
+This lab is designed to work within those constraints to offer participants the opportunity to build experience installing OpenShift 4 in a VMware environment. Because our sandbox user has limited permissions, we're not going to be able to use [installer-provisioned infrastructure (IPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/preparing-to-install-on-vmc.html#installer-provisioned-method-to-install-ocp-on-vmc). If we were, we could leverage [these awesome scripts](https://gist.github.com/johnsimcall/69e7e7de04130c59c9bd51adbf9d9a2a) to grant the necessary privileges and then let the OpenShift installer handle pretty much everything else. Instead, we're going to use [user-provisioned infrastructure (UPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html). On the bright side, this lab will give you a better understanding of the nuts and bolts of the install, and prepare you for customer environments where granting the permissions required for IPI is not achievable.
 
 In order to build our cluster, we're going to setup a few things on the bastion host:
 * A load balancer to route API and Ingress traffic.
@@ -61,7 +61,7 @@ vcenter_password: CHANGEME
 ocp4_pull_secret: 'CHANGEME'
 ##################################
 ```
-1. Replace the existing values for the guid and vcenter password you got from RHDP
+1. Replace the existing values for the guid and vCenter password you got from RHDP.
 2. Grab your OpenShift Pull Secret from the [Red Hat Hybrid Cloud Console](https://console.redhat.com/openshift/install/vsphere/agent-based) and paste it *between the single ticks* for the `ocp4_pull_secret` variable.
 
 ### Wait, what am I about to run?
@@ -85,7 +85,7 @@ Recall that our bastion will be serving a handful of important functions to allo
         bind 192.168.{{ labenv_segment }}.10:80
         default_backend insecure
     ```
-    You can see we're listening on port 6443 for the Kubernetes API, 22623 for serving ignition configs, and 80 and 443 for application ingress. We then route corresponding traffic to the appropriate backends, defined further down in the HAProxy and described in the OpenShift documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-load-balancing-user-infra_installing-vmc-user-infra).
+    You can see we're listening on port 6443 for the Kubernetes API, 22623 for serving ignition configs, and 80 and 443 for application ingress. We then route corresponding traffic to the appropriate backends, defined further down in the HAProxy config and described in the OpenShift documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-load-balancing-user-infra_installing-vmc-user-infra).
 
   * **A local DNS server to provide hostname resolution within the OpenShift cluster**. We don't have the capacity to create public DNS records, a step that is normally required for `api.<cluster_name>.<base_domain>` and `*.apps.<cluster_name>.<base_domain>` as indicated in the documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-dns-user-infra_installing-vmc-user-infra). For our lab, we'll use a self-hosted DNS server called BIND. The most important piece of our configuration is defined in `ansible/templates/dynamic.opentlc.com.zone.j2`:
     ```
@@ -110,11 +110,10 @@ Recall that our bastion will be serving a handful of important functions to allo
     worker-1.{{ guid }}    IN    A    192.168.{{ labenv_segment }}.201
     worker-2.{{ guid }}    IN    A    192.168.{{ labenv_segment }}.202
     provision.{{ guid }}    IN    A    192.168.{{ labenv_segment }}.10
-
     ```
     For all the records we're going to need, we define them as `<role>.<guid>.dynamic.opentlc.com`, and assign each one an IP address after `{{ labenv_segment }}` is expanded to the third octet in ansible. If you want to learn more about using BIND, you can take a look at [this blog](https://www.redhat.com/sysadmin/dns-configuration-introduction).
 
-  * **A file server to host ignition configs**. We'll also need to host ignition configs so that our RHCOS machines can fetch their configuration. We'll generate these during the lab exercises and copy them over to an Apache server, which is simple enough to install, configure, and enable with ansible, as we see in `ansible/main.yml`:
+  * **A file server to host ignition configs**. We'll also need to host ignition configs so that our RHCOS machines can fetch their configuration when they boot up. We'll generate these during the lab exercises and copy them over to an Apache server, which is simple enough to install, configure, and enable with ansible, as we see in `ansible/main.yml`:
     ```
     - name: Install required software
         ansible.builtin.yum:
@@ -185,7 +184,7 @@ Commentary about what the different fields mean can be found in the documentatio
 ```
 
 ### Run the configuration playbook
-Now we should be ready to run our playbook!
+Now that that's out of the way, let's run the playbook and get the installation underway.
 ```bash
 ansible-playbook -i ansible/inventory ansible/main.yml
 ```
