@@ -5,7 +5,7 @@ ocp4_pull_secret: 'CHANGEME'
 ##################################
 
 ## Defaults
-ocp_version: 4.11.21
+ocp_version: 4.11.9
 student_name: lab-user
 
 vcenter_domain: vc.opentlc.com
