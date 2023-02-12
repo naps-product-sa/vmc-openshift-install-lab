@@ -385,7 +385,7 @@ INFO Waiting up to 30m0s (until 10:40AM) for bootstrapping to complete...
 DEBUG Bootstrap status: complete                   
 INFO It is now safe to remove the bootstrap resources 
 ```
-You read that right! It's now safe to obliterate your **bootstrap** machine. The installation is not finished though, the cluster still has work to do. As nodes join into the cluster, the issue certificate-signing requests (CSRs) that must be approved before the installation can complete. About 5 minutes after the bootstrap is finished, there should be a couple of requests pending, which you can approve like this:
+You read that right! It's now safe to obliterate your **bootstrap** machine. The installation is not finished though, the cluster still has work to do. As nodes join into the cluster, they issue certificate-signing requests (CSRs) that must be approved before the installation can complete. About 5 minutes after the bootstrap is finished, there should be a couple of requests pending, which you can approve like this:
 ```bash
 for i in `oc get csr --no-headers | grep -i pending |  awk '{ print $1 }'`; do oc adm certificate approve $i; done
 ```
