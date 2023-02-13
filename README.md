@@ -27,29 +27,21 @@ Fortunately, we've written some ansible to handle these pre-reqs for you. Let's 
 ## Preparing the Lab Environment
 Now we're going to run some ansible to prepare our lab environment to install OpenShift using UPI.
 
-### Configure your inventory file
-Let's start by fixing the hostname in your `ansible/inventory` file so that it contains the actual hostname of your bastion in VMC. Right now it looks like this:
+### SSH into your bastion
+We're going to be running this lab from your bastion in VMC, so start by SSHing into it with the hostname and username/password you got from RHDP:
 ```bash
-[bastions]
-bastion.${GUID}.dynamic.opentlc.com   ansible_user=lab-user ansible_password=${PASSWORD}
-```
-1. Replace the `${GUID}` with the guid of your RHDP deployment. It should be something like `dd4sa`.
-2. Replace the `${PASSWORD}` with your SSH password.
-
-Now your `ansible/inventory` file should look something like this:
-```bash
-[bastions]
-bastion.dd4sa.dynamic.opentlc.com   ansible_user=lab-user    ansible_password=3L95nnTWuqgk
+ssh lab-user@bastion.GUID.dynamic.opentlc.com
 ```
 
-Let's test that you've done this correctly by running an ad-hoc command against your bastions host group:
+### Clone this repository and cd into it
 ```bash
-ansible bastions -i ansible/inventory -a 'echo hi'
+git clone https://github.com/andykrohg/vmc-openshift-install-lab.git
+cd vmc-openshift-install-lab
 ```
-The output should look something like:
+
+### Install ansible
 ```bash
-bastion.dd4sa.dynamic.opentlc.com | CHANGED | rc=0 >>
-hi
+sudo python3 -m pip install ansible
 ```
 
 ### Update your vars file
@@ -142,35 +134,35 @@ Recall that our bastion will be serving a handful of important functions to allo
 To get us started, ansible will also create a directory to house the installation materials at `~/ocpinstall/install` and handle a couple installation prereqs for us:
 * [Generate an OpenSSH keypair](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc.html#ssh-agent-using_installing-vmc) to facilitate cluster node SSH access.
 * [Create an install-config.yaml file](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-initializing-manual_installing-vmc-user-infra) to provide relevant configuration to the OpenShift installer. The OpenShift Installer consumes and deletes this file when run, so ansible copies over a backup too. Here's what the template at `ansible/templates/install-config.yaml.j2` looks like:
-```
-apiVersion: v1
-baseDomain: dynamic.opentlc.com
-compute:
-- architecture: amd64
-  hyperthreading: Enabled
-  name: worker
-  replicas: 0
-controlPlane:
-  architecture: amd64
-  hyperthreading: Enabled
-  name: master
-  replicas: 3
-metadata:
-  name: {{ guid }}
-platform:
-  vsphere:
-    datacenter: SDDC-Datacenter
-    defaultDatastore: WorkloadDatastore
-    diskType: thin
-    folder: /SDDC-Datacenter/vm/Workloads/sandbox-{{ guid }}
-    password: {{ vcenter_password}}
-    username: sandbox-{{ guid }}@{{ vcenter_domain }}
-    vCenter: {{ vcenter_hostname }}
-publish: External
-pullSecret: {{ ocp4_pull_secret | to_json }}
-sshKey: '{{ sshKey_content }}'
-```
-Commentary about what the different fields mean can be found in the documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-vsphere-config-yaml_installing-vmc-user-infra).
+   ```
+   apiVersion: v1
+   baseDomain: dynamic.opentlc.com
+   compute:
+   - architecture: amd64
+   hyperthreading: Enabled
+   name: worker
+   replicas: 0
+   controlPlane:
+   architecture: amd64
+   hyperthreading: Enabled
+   name: master
+   replicas: 3
+   metadata:
+   name: {{ guid }}
+   platform:
+   vsphere:
+       datacenter: SDDC-Datacenter
+       defaultDatastore: WorkloadDatastore
+       diskType: thin
+       folder: /SDDC-Datacenter/vm/Workloads/sandbox-{{ guid }}
+       password: {{ vcenter_password}}
+       username: sandbox-{{ guid }}@{{ vcenter_domain }}
+       vCenter: {{ vcenter_hostname }}
+   publish: External
+   pullSecret: {{ ocp4_pull_secret | to_json }}
+   sshKey: '{{ sshKey_content }}'
+   ```
+   Commentary about what the different fields mean can be found in the documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-vsphere-config-yaml_installing-vmc-user-infra).
 * [Generate Kubernetes manifests](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-user-infra-generate-k8s-manifest-ignition_installing-vmc-user-infra), removing those which aren't required for our install, and disabling schedulable masters:
 ```
   - name: Create manifests and replace some content
@@ -184,10 +176,23 @@ Commentary about what the different fields mean can be found in the documentatio
 ```
 
 ### Run the configuration playbook
-Now that that's out of the way, let's run the playbook and get the installation underway.
+Now that that's out of the way, let's run the playbook.
 ```bash
-ansible-playbook -i ansible/inventory ansible/main.yml
+ansible-playbook ansible/main.yml
 ```
+After it completes, let's check a few hostnames to make sure our DNS is working properly:
+```bash
+export GUID=<MY_GUID>
+
+# The first two should both point to the bastion (which acts as a load balancer)
+dig +short api.$GUID.dynamic.opentlc.com
+dig +short *.apps.$GUID.dynamic.opentlc.com
+
+# And we need unique IPs for each master and worker node
+dig +short master-0.$GUID.dynamic.opentlc.com
+dig +short worker-0.$GUID.dynamic.opentlc.com
+```
+You should see `dig` return a valid IP address for each hostname. If not, try running `sudo systemctl restart named` and check again.
 
 ## Installing OpenShift
 Now we're ready to install OpenShift!
@@ -209,8 +214,6 @@ Now we're ready to install OpenShift!
 Now we'll generate ignition configs for the nodes that will compose our cluster.
 
 ```bash
-ssh lab-user@bastion.GUID.dynamic.opentlc.com
-
 cd ~/ocpinstall/install
 openshift-install create ignition-configs
 

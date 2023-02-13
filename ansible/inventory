@@ -1,2 +1,0 @@
-[bastions]
-bastion.${GUID}.dynamic.opentlc.com   ansible_user=lab-user ansible_password=${PASSWORD}

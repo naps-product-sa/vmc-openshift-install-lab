@@ -1,5 +1,5 @@
 - name: Configure bastion for OCP4 UPI
-  hosts: bastions
+  hosts: localhost
   become: true
   vars_files:
   - vars.yml
@@ -125,7 +125,7 @@
       enabled: true
 
 - name: Create OpenShift Installation Directory and Prereqs
-  hosts: bastions
+  hosts: localhost
   become: true
   become_user: "{{ student_name }}"
   vars_files:
