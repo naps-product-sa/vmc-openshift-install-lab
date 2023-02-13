@@ -260,7 +260,7 @@ Next we'll create the bootstrap node, which will help facilitate the install and
 4. Accept the default compute resource in section 2, and select **Next**.
 5. Select the **WorkloadDatastore** for section 3, then click **Next**.
 6. Accept the remaining defaults, then click **Finish** to create the Virtual Machine.
-7. Right click on the newly created VM (master0.GUID.dynamic.opentlc.com) and select **Edit Settings...**
+7. Right click on the newly created VM (bootstrap.GUID.dynamic.opentlc.com) and select **Edit Settings...**
 8. Adjust the following settings in **Virtual Hardware**:
    * CPU: 4
    * Memory: 16 GB
