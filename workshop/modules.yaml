@@ -1,0 +1,28 @@
+---
+modules:
+  lab01:
+    name: Lab 01 - Introduction
+  lab02:
+    name: Lab 02 - Preparing the Lab Environment
+  lab03:
+    name: Lab 03 - Examining the Prerequisites
+  lab04:
+    name: Lab 04 - Running the Configuration Playbook
+  lab05:
+    name: Lab 05 - Creating a VM Template
+  lab06:
+    name: Lab 06 - Generating Ignition Configs
+  lab07:
+    name: Lab 07 - Creating the Temporary Bootstrap Node
+  lab08:
+    name: Lab 08 - Creating the Control Plane Nodes
+  lab09:
+    name: Lab 09 - Creating the Compute Nodes
+  lab10:
+    name: Lab 10 - Starting the Bootstrap
+  lab11:
+    name: Lab 11 - Accessing Your Cluster
+config:
+  vars:
+    - name: GUID
+      value: CHANGEME

@@ -67,9 +67,6 @@ frontend machineconfig
 frontend tlsrouter
     bind 192.168.{{ labenv_segment }}.10:443
     default_backend secure
-frontend insecurerouter
-    bind 192.168.{{ labenv_segment }}.10:80
-    default_backend insecure
 #---------------------------------------------------------------------
 # static backend
 #---------------------------------------------------------------------
@@ -91,8 +88,3 @@ backend secure
     server compute1 192.168.{{ labenv_segment }}.201:443 check
     server compute2 192.168.{{ labenv_segment }}.202:443 check
     server compute2 192.168.{{ labenv_segment }}.203:443 check
-backend insecure
-    balance source
-    server worker0 192.168.{{ labenv_segment }}.200:80 check
-    server worker1 192.168.{{ labenv_segment }}.201:80 check
-    server worker2 192.168.{{ labenv_segment }}.202:80 check
