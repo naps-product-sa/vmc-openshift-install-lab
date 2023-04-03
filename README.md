@@ -4,7 +4,9 @@ This repository is intended to leverage the [VMware Cloud Open Environment Servi
 ## Deploy the labguide
 First, SSH into your bastion:
 ```bash
-ssh lab-user@bastion.<your guid>.dynamic.opentlc.com
+export GUID=<your guid>
+
+ssh lab-user@bastion.$GUID.dynamic.opentlc.com
 ```
 
 Then fire up a container with `podman`:
