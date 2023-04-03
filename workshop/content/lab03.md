@@ -12,11 +12,15 @@ Recall that our bastion will be serving a handful of important functions to allo
     frontend tlsrouter
         bind 192.168.{{ labenv_segment }}.10:443
         default_backend secure
-    frontend insecurerouter
-        bind 192.168.{{ labenv_segment }}.10:80
-        default_backend insecure
+    # frontend insecurerouter
+    #     bind 192.168.{{ labenv_segment }}.10:80
+    #     default_backend insecure
     ```
-    You can see we're listening on port 6443 for the Kubernetes API, 22623 for serving ignition configs, and 80 and 443 for application ingress. We then route corresponding traffic to the appropriate backends, defined further down in the HAProxy config and described in the OpenShift documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-load-balancing-user-infra_installing-vmc-user-infra).
+    You can see we're listening on port 6443 for the Kubernetes API, 22623 for serving ignition configs, and 443 for application ingress. 
+    
+    > We've commented out the load balancing for insecure traffic on port 80 because we're currently using it to host this labguide :). This isn't terribly uncommon in customer environments anyway; there are plenty of organizations that require TLS encryption on all HTTP traffic. 
+    
+    We then route corresponding traffic to the appropriate backends, defined further down in the HAProxy config and described in the OpenShift documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-load-balancing-user-infra_installing-vmc-user-infra).
 
   * **A local DNS server to provide hostname resolution within the OpenShift cluster**. We don't have the capacity to create public DNS records, a step that is normally required for `api.<cluster_name>.<base_domain>` and `*.apps.<cluster_name>.<base_domain>` as indicated in the documentation [here](https://docs.openshift.com/container-platform/4.11/installing/installing_vmc/installing-vmc-user-infra.html#installation-dns-user-infra_installing-vmc-user-infra). For our lab, we'll use a self-hosted DNS server called BIND. The most important piece of our configuration is defined in `ansible/templates/dynamic.opentlc.com.zone.j2`:
     ```
@@ -32,6 +36,7 @@ Recall that our bastion will be serving a handful of important functions to allo
     dns                     IN      A       192.168.{{ labenv_segment }}.10
     *.apps.{{ guid }}     IN    A    192.168.{{ labenv_segment }}.10
     ns1.{{ guid }}     IN    A    192.168.{{ labenv_segment }}.111
+    bastion.{{ guid }}     IN    A    192.168.{{ labenv_segment }}.10
     api.{{ guid }}     IN    A    192.168.{{ labenv_segment }}.10
     api-int.{{ guid }}     IN    A    192.168.{{ labenv_segment }}.10
     master-0.{{ guid }}    IN    A    192.168.{{ labenv_segment }}.100
