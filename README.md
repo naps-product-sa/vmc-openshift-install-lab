@@ -9,7 +9,9 @@ ssh lab-user@bastion.<your guid>.dynamic.opentlc.com
 
 Then fire up a container with `podman`:
 ```bash
-sudo podman run -d -p 80:10080 -e GUID=<your guid> -e TERMINAL_TAB=split quay.io/akrohg/vmc-openshift-install-dashboard
+export GUID=<your guid>
+
+sudo podman run -d -p 80:10080 -e GUID=$GUID quay.io/akrohg/vmc-openshift-install-dashboard
 ```
 
 Now you should be able to view your labguide in the browser:
