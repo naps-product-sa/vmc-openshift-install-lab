@@ -21,8 +21,8 @@ sudo python3 -m pip install ansible
 Next let's add some properties to `ansible/vars.yml`. We're interested in this section:
 ```bash
 ###### YOUR PROPERTIES HERE ######
-guid: CHANGEME
-vcenter_password: CHANGEME
+guid: 'CHANGEME'
+vcenter_password: 'CHANGEME'
 ocp4_pull_secret: 'CHANGEME'
 ##################################
 ```

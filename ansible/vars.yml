@@ -1,6 +1,6 @@
 ###### YOUR PROPERTIES HERE ######
-guid: CHANGEME #(e.g. dd4sw)
-vcenter_password: CHANGEME
+guid: 'CHANGEME'
+vcenter_password: 'CHANGEME'
 ocp4_pull_secret: 'CHANGEME'
 ##################################
 
