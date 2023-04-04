@@ -1,7 +1,7 @@
 #### Configure bastion for OCP4 UPI
 Recall that our bastion will be serving a handful of important functions to allow us to proceed with our install in a constrained environment.
 
-  * **A load balancer to route API and Ingress traffic**. We don't have the permission to grant inbound Internet access to hosts we create, we'll route all of our traffic through the bastion host. In order to achieve this, we'll use HAProxy. Check out line 61 in our config file at `ansible/templates/haproxy.j2`:
+  * **A load balancer to route API and Ingress traffic**. Since we don't have the permission to grant inbound Internet access to hosts we create, we'll route all of our traffic through the bastion host. In order to achieve this, we'll use HAProxy. Check out line 61 in our config file at `ansible/templates/haproxy.j2`:
     ```bash
     frontend api
         bind 192.168.{{ labenv_segment }}.10:6443

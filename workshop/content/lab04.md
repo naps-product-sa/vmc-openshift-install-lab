@@ -2,7 +2,7 @@ Now that that's out of the way, let's run the playbook.
 ```execute
 ansible-playbook ansible/main.yml
 ```
-After it completes, let's check a few hostnames to make sure our DNS is working properly. `api.%GUID%.dynamic.opentlc.com` and `*.apps.%GUID%.dynamic.opentlc.com` should both point to the bastion (which acts as a load balancer):
+After it completes, let's check a few hostnames to make sure our DNS is working properly. `api.%GUID%.dynamic.opentlc.com` and `*.apps.%GUID%.dynamic.opentlc.com` should both point to the bastion (our load balancer):
 ```execute
 dig +short api.%GUID%.dynamic.opentlc.com
 dig +short *.apps.%GUID%.dynamic.opentlc.com
