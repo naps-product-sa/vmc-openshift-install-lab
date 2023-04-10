@@ -1,8 +1,8 @@
 # VMC OpenShift Install Lab
-This repository is intended to leverage the VMware Cloud Open Environment Service in the [Red Hat Demo Platform (RHDP)](https://demo.redhat.com) for a UPI installation of OpenShift. If you haven't already, go ahead and [request the service](https://demo.redhat.com/catalog?search=vmware&category=Open_Environments&item=babylon-catalog-prod%2Fvmc.sandbox.prod), then proceed with the steps below to spin up the labguide. An example labguide can be viewed [here](http://vmc-lab.rhkrohg.link:8080/workshop/lab01).
+This repository is intended to leverage the VMware Cloud Open Environment Service in the [Red Hat Demo Platform (RHDP)](https://demo.redhat.com) for a UPI installation of OpenShift. If you haven't already, go ahead and [request the service](https://demo.redhat.com/catalog?search=vmware&category=Open_Environments&item=babylon-catalog-prod%2Fvmc.sandbox.prod), then proceed with the steps below to spin up the labguide. An example can be viewed [here](http://vmc-lab.rhkrohg.link:8080/workshop/lab01).
 
 ## Deploy the labguide
-The labguide for this workshop is built using [OpenShift Homeroom](https://github.com/openshift-homeroom). It serves up the workshop instructins in markdown alongside a web terminal. You can run it in a container on your bastion host and access it using your browser. First, SSH into your bastion:
+The labguide for this workshop is built using [OpenShift Homeroom](https://github.com/openshift-homeroom). It serves up the workshop instructions in markdown alongside a web terminal. You can run it in a container on your bastion host and access it using your browser. First, SSH into your bastion:
 ```bash
 export GUID=<your guid>
 
