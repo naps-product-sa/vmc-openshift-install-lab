@@ -8,7 +8,7 @@ ssh lab-user@bastion.%GUID%.dynamic.opentlc.com
 
 ### Clone this repository and cd into it
 ```execute
-git clone https://github.com/andykrohg/vmc-openshift-install-lab.git
+git clone https://github.com/naps-product-sa/vmc-openshift-install-lab.git
 cd vmc-openshift-install-lab
 ```
 
